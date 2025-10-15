@@ -1,0 +1,40 @@
+from app import db
+from datetime import date
+
+class authors(db.Model):
+    author_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    author_name = db.Column(db.String(255), nullable=False)
+    author_nationality = db.Column(db.String(100))
+    author_dob = db.Column(db.Date)
+
+class members(db.Model):
+    member_id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    phone = db.Column(db.String(20))
+    membership_start = db.Column(db.Date, default=date.today, nullable=False)
+
+class books(db.Model):
+    book_id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    author_id = db.Column(db.String(255), nullable=False)
+    published_year = db.Column(db.Integer)
+
+class lendings(db.Model):
+    lending_id = db.Column(db.Integer, primary_key=True)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.book_id'), nullable=False)
+    member_id = db.Column(db.Integer, db.ForeignKey('members.member_id'), nullable=False)
+    lend_date = db.Column(db.Date, default=date.today, nullable=False)
+    due_date = db.Column(db.Date, nullable=False)
+    return_date = db.Column(db.Date)
+
+class category(db.Model):
+    __tablename__ = 'categories'
+    category_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+
+class bookCategory(db.Model):
+    __tablename__ = 'book_categories'
+    book_id = db.Column(db.Integer, db.ForeignKey('books.book_id'), primary_key=True, nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.category_id'), primary_key=True, nullable=False)
