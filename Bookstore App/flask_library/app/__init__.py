@@ -13,10 +13,12 @@ def create_app():
     from app.Route.AuthorRoute import authors_bp;
     from app.Route.MemberRoute import members_bp
     from app.Route.LendRoute import lendings_bp;
+    from app.Route.principlesVersionsRoute import principles_bp;
     app.register_blueprint(books_bp)
     app.register_blueprint(authors_bp)
     app.register_blueprint(members_bp)
     app.register_blueprint(lendings_bp)
+    app.register_blueprint(principles_bp)
 
     with app.app_context():
         db.create_all()  # create tables
