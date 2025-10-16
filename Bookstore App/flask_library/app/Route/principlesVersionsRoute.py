@@ -57,7 +57,7 @@ def get_book(book_id):
             return resp
     return jsonify({"error": "Not found"}), 404
 
-@principles_bp.route('/books', methods=['POST'])
+@principles_bp.route('p4/books', methods=['POST'])
 def create_book():
     auth = request.headers.get("Authorization")
     if auth != f"Bearer {TOKEN}":
