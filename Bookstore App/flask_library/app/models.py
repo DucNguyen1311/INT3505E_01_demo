@@ -1,4 +1,4 @@
-from app import db
+from app.extension import db
 from datetime import date
 from sqlalchemy.orm import relationship
 
@@ -17,6 +17,7 @@ class members(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     phone = db.Column(db.String(20))
     membership_start = db.Column(db.Date, default=date.today, nullable=False)
+    password = db.Column(db.String(100))
 
 class books(db.Model):
     book_id = db.Column(db.Integer, primary_key=True)

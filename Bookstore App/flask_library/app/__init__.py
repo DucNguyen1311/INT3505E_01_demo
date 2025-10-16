@@ -1,7 +1,12 @@
-from flask import Flask
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import uuid
+from app.models import members
+from functools import wraps
+from datetime import datetime, timezone, timedelta
+from app.extension import db
 
 def create_app():
     app = Flask(__name__)
@@ -24,3 +29,21 @@ def create_app():
         db.create_all()  # create tables
 
     return app
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.cookies.get('jwt_token')
+
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            current_user = members.query.filter_by(public_id=data['public_id']).first()
+        except:
+            return jsonify({'message': 'Token is invalid!'}), 401
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated

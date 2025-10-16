@@ -9,12 +9,12 @@ TOKEN = "abc123"
 
 #Version 1, principle Client-Server, tách biệt phía client và server. Client gửi GET / Book, server trả về danh sách JSON
 @principles_bp.route('/p1/books', methods=['GET'])
-def get_books():
+def get_booksv1():
     return jsonify(books)
 
 #Version 2, principle Stateless, server không nhớ trạng thái người dùng, trong server cần AUTH, mọi request đều gửi token thời gian thực
 @principles_bp.route('/p2/books', methods=['GET'])
-def get_books():
+def get_booksv2():
     auth = request.headers.get("Authorization")
     if auth != f"Bearer {TOKEN}":
         return jsonify({"error": "Unauthorized"}), 401
@@ -23,7 +23,7 @@ def get_books():
 #Version 3, principle Cacheable. Response có thể được cache để giảm tải server, Response nên có header cache-control.
 
 @principles_bp.route('/p3/books', methods=['GET'])
-def get_books():
+def get_booksv3():
     auth = request.headers.get("Authorization")
     if auth != f"Bearer {TOKEN}":
         return jsonify({"error": "Unauthorized"}), 401
@@ -35,7 +35,7 @@ def get_books():
 #Version 4, principle Uniform Interface, Giao tiếp phải tuân theo quy chuẩn thống nhất.
 
 @principles_bp.route('/p4/books', methods=['GET'])
-def get_books():
+def get_booksv4():
     auth = request.headers.get("Authorization")
     if auth != f"Bearer {TOKEN}":
         return jsonify({"error": "Unauthorized"}), 401
@@ -45,7 +45,7 @@ def get_books():
     return resp
 
 @principles_bp.route('p4/books/<int:book_id>', methods=['GET'])
-def get_book(book_id):
+def get_bookv4(book_id):
     auth = request.headers.get("Authorization")
     if auth != f"Bearer {TOKEN}":
         return jsonify({"error": "Unauthorized"}), 401
@@ -58,7 +58,7 @@ def get_book(book_id):
     return jsonify({"error": "Not found"}), 404
 
 @principles_bp.route('p4/books', methods=['POST'])
-def create_book():
+def create_bookv4():
     auth = request.headers.get("Authorization")
     if auth != f"Bearer {TOKEN}":
         return jsonify({"error": "Unauthorized"}), 401
