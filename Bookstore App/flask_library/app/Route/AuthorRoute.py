@@ -1,9 +1,16 @@
 from flask import Blueprint, jsonify, request
 from app import db
-from app.models import authors
+from app.models import authors, serialize_book
 from datetime import date
 
 authors_bp = Blueprint('authors_bp', __name__, url_prefix='/api/authors')
+
+@authors_bp.get("/<int:author_id>/books")
+def list_author_books(author_id: int):
+    author = authors.query.get(author_id)
+    if author is None:
+        abort(404, description="Author not found")
+    return jsonify([serialize_book(b) for b in author.books])
 
 @authors_bp.route('', methods=['POST'])
 def add_author():
