@@ -2,9 +2,11 @@ from flask import Blueprint, jsonify, request
 from app import db
 from app.models import books
 from sqlalchemy.exc import IntegrityError
+from app.auth import token_required
 
 books_bp = Blueprint('books_bp', __name__, url_prefix='/api/books')
 
+@token_required
 @books_bp.route('', methods=['GET'])
 def get_books():
     title_query = request.args.get('title', None)
@@ -22,6 +24,7 @@ def get_books():
         'published_year': b.published_year
     } for b in result])
 
+@token_required
 @books_bp.route('', methods=['POST'])
 def add_book():
     data = request.get_json()
@@ -41,6 +44,7 @@ def add_book():
 
     return jsonify({'message': 'Book added successfully!', 'book_id': new_book.book_id}), 201
 
+@token_required
 @books_bp.route('/bulk', methods=['POST'])
 def add_books():
     data = request.get_json()

@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify, Blueprint
 from datetime import date
 from app import db
 from app.models import books, members, lendings
+from app.auth import token_required
 
 lendings_bp = Blueprint('lends_bp', __name__, url_prefix='/api/lendings')
 
+@token_required
 @lendings_bp.route("/", methods=["POST"])
 def create_lending():
     data = request.get_json(force=True) or {}

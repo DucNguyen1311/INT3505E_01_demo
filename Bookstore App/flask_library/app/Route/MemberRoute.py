@@ -4,10 +4,11 @@ from app import db
 from app.models import members
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
+from app.auth import token_required
 
 members_bp = Blueprint('members_bp', __name__, url_prefix='/api/members')
 
-@members_bp.route("/registration", methods=["POST"])
+@members_bp.route("", methods=["POST"])
 def add_member():
     data = request.get_json(force=True)
     required = ["first_name", "last_name", "email", "password"]
@@ -45,8 +46,8 @@ def add_member():
         "membership_start": member.membership_start.isoformat()
     }), 201
 
-# View all members
-@members_bp.route("/", methods=["GET"])
+@token_required
+@members_bp.route("", methods=["GET"])
 def get_members():
     members = members.query.order_by(members.member_id.asc()).all()
     return jsonify([
@@ -60,7 +61,7 @@ def get_members():
         } for m in members
     ]), 200
 
-# View member by id
+@token_required
 @members_bp.route("/<int:member_id>", methods=["GET"])
 def get_member(member_id):
     m = members.query.get(member_id)

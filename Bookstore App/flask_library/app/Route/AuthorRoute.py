@@ -2,9 +2,11 @@ from flask import Blueprint, jsonify, request
 from app import db
 from app.models import authors, serialize_book
 from datetime import date
+from app.auth import token_required
 
 authors_bp = Blueprint('authors_bp', __name__, url_prefix='/api/authors')
 
+@token_required
 @authors_bp.get("/<int:author_id>/books")
 def list_author_books(author_id: int):
     author = authors.query.get(author_id)
@@ -12,6 +14,7 @@ def list_author_books(author_id: int):
         abort(404, description="Author not found")
     return jsonify([serialize_book(b) for b in author.books])
 
+@token_required
 @authors_bp.route('', methods=['POST'])
 def add_author():
     data = request.get_json()
@@ -29,6 +32,7 @@ def add_author():
     db.session.commit()
     return jsonify({'message': 'Author added', 'author_id': new_author.author_id}), 201
 
+@token_required
 @authors_bp.route('', methods=['GET'])
 def show_all_authors():
     author_list = authors.query.all()
@@ -42,6 +46,8 @@ def show_all_authors():
         })
     return jsonify(result), 200
 
+
+@token_required
 @authors_bp.route('/<int:author_id>', methods=['GET'])
 def get_author_by_id(author_id):
     author = authors.query.get(author_id)
@@ -55,6 +61,7 @@ def get_author_by_id(author_id):
     }
     return jsonify(result), 200
 
+@token_required
 @authors_bp.route('/bulk', methods=['POST'])
 def add_authors_bulk():
     payload = request.get_json(force=True)
