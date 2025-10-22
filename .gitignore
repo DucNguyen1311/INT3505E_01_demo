@@ -1,0 +1,7 @@
+
+Bookstore App/flask_library/.env
+Bookstore App/flask_library/venv/
+pyvenv.cfg
+Bookstore App/.vscode/
+__pycache__/
+*.pyc
