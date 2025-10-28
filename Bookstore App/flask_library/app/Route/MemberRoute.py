@@ -8,7 +8,7 @@ from app.auth import token_required
 
 members_bp = Blueprint('members_bp', __name__, url_prefix='/api/members')
 
-@members_bp.route("", methods=["POST"])
+@members_bp.route("/registration", methods=["POST"])
 def add_member():
     data = request.get_json(force=True)
     required = ["first_name", "last_name", "email", "password"]
@@ -83,7 +83,7 @@ def login():
     email = data.get("email")
     password = data.get("password")
     if not email or not password:
-        return jsonify({"message": "Email và password là bắt buộc"}), 400
+        return jsonify({"message": "Email and password is needed"}), 400
 
     user = members.query.filter_by(email=email).first()
     if not user or not check_password_hash(user.password, password):

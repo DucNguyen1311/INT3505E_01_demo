@@ -4,7 +4,8 @@ from app.models import books
 from sqlalchemy.exc import IntegrityError
 from app.auth import token_required
 
-books_bp = Blueprint('books_bp', __name__, url_prefix='/api/books')
+books_bp = Blueprint('books_bp', __name__, url_prefix='/api/v1/books')
+books_bp2 = Blueprint('books_bp2', __name__, url_prefix='/api/v2/books')
 
 @token_required
 @books_bp.route('', methods=['GET'])
