@@ -1,0 +1,4 @@
+theo em tìm hiểu, vấn đề N+1 queries xảy ra khi ta truy vấn các dữ liệu có quan hệ cha con, ví dụ, ta lấy tòan bộ các tác giả ra, xong lại lấy toàn bộ sách tác giả đó viết, mỗi tác giả ta cần query 1 lần để lấy tòan bộ sách ra, tính thêm cả lần query đầu tiên thì tốn tổng cộng N+1 query. Khi số lượng data còn chưa nhiều thì ảnh hưởng chưa đáng kể, nhưng khi có nhiều data, việc thiết kế dính lỗi N+1 query sẽ làm server chậm hẳn đi cho dù query dựa trên ID được đánh index.
+
+Theo em tìm hiểu thì cách giải quyết đơn giản nhất là điều chỉnh cách ta query về database. thay vì cứ query sách theo từng tác giả một, ta sẽ dùng eager loading,
+Thay vì đợi từng lệnh query một rất tốn thời gian, eager loading sẽ load hết tòan bộ mọi thứ ta cần chỉ trong một lần. 
