@@ -89,7 +89,10 @@ def login():
     if not user or not check_password_hash(user.password, password):
         return jsonify({"message": "Invalid email or password"}), 401
     exp = datetime.now(timezone.utc) + timedelta(hours=1)
-    token = jwt.encode({"public_id": user.member_id, "exp": exp}, current_app.config["SECRET_KEY"], algorithm="HS256")
+    token = jwt.encode({
+        "public_id": user.member_id,
+          "exp": exp
+          }, current_app.config["SECRET_KEY"], algorithm="HS256")
 
     body = {"token": token, "token_type": "Bearer", "expires_in": 3600}
     resp = make_response(jsonify(body), 200)

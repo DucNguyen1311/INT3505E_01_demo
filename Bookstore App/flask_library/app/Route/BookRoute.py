@@ -2,14 +2,13 @@ from flask import Blueprint, jsonify, request
 from app import db
 from app.models import books
 from sqlalchemy.exc import IntegrityError
-from app.auth import token_required
+from app.auth import token_required, role_required
 
-books_bp = Blueprint('books_bp', __name__, url_prefix='/api/v1/books')
-books_bp2 = Blueprint('books_bp2', __name__, url_prefix='/api/v2/books')
+books_bp = Blueprint('books_bp', __name__, url_prefix='/api/books')
 
-@token_required
 @books_bp.route('', methods=['GET'])
-def get_books():
+@token_required
+def get_books(current_user):
     title_query = request.args.get('title', None)
     page = request.args.get('page', default=1, type=int)
     limit = request.args.get('limit', default=10, type=int)
@@ -25,8 +24,9 @@ def get_books():
         'published_year': b.published_year
     } for b in result])
 
-@token_required
 @books_bp.route('', methods=['POST'])
+@token_required
+@role_required('ctv')
 def add_book():
     data = request.get_json()
     required_fields = ['title', 'author_id']
@@ -45,8 +45,9 @@ def add_book():
 
     return jsonify({'message': 'Book added successfully!', 'book_id': new_book.book_id}), 201
 
+@books_bp.route('', methods=['POST'])
 @token_required
-@books_bp.route('/bulk', methods=['POST'])
+@role_required('ctv')
 def add_books():
     data = request.get_json()
     if not isinstance(data, list):
