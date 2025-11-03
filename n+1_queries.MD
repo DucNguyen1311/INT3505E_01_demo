@@ -2,3 +2,4 @@ theo em tìm hiểu, vấn đề N+1 queries xảy ra khi ta truy vấn các d�
 
 Theo em tìm hiểu thì cách giải quyết đơn giản nhất là điều chỉnh cách ta query về database. thay vì cứ query sách theo từng tác giả một, ta sẽ dùng eager loading,
 Thay vì đợi từng lệnh query một rất tốn thời gian, eager loading sẽ load hết tòan bộ mọi thứ ta cần chỉ trong một lần. 
+///
