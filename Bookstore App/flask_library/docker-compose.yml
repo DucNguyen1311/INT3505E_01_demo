@@ -1,0 +1,33 @@
+services:
+  web:
+    build: . 
+    container_name: my_flask_app
+    ports:
+      - "5000:5000" 
+    environment:
+      DATABASE_URL: postgresql://postgres:123@db:5432/book
+      FLASK_APP: app.py 
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16
+    container_name: my_postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: book
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d book"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
