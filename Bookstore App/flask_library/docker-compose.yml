@@ -28,6 +28,23 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  
+  tests:
+    image: postman/newman
+    working_dir: /etc/newman
+    volumes:
+      - ./API_TEST.postman_collection.json:/etc/newman/API_TEST.postman_collection.json
+      - ./New_Environment.postman_environment.json:/etc/newman/New_Environment.postman_environment.json
+      - ./test-results:/etc/newman/results 
+    
+    command: >
+      run API_TEST.postman_collection.json
+      -e New_Environment.postman_environment.json
+      -r cli,htmlextra
+      --reporter-htmlextra-export /etc/newman/results/report.html
+      
+    depends_on:
+      - web
 
 volumes:
   postgres_data:

@@ -6,13 +6,49 @@ from app.auth import token_required, role_required
 
 books_bp = Blueprint('books_bp', __name__, url_prefix='/api/books')
 
+@books_bp.route('/<int:book_id>', methods=['DELETE'])
+@token_required
+@role_required('ctv')
+def delete_book(current_user, book_id):
+    book = books.query.get(book_id)
+    if not book:
+        return jsonify({'error': 'Book not found'}), 404
+
+    db.session.delete(book)
+    db.session.commit()
+    return jsonify({'message': 'Book deleted successfully!'})
+
+@books_bp.route('/<int:book_id>', methods=['PUT'])
+@token_required
+@role_required('ctv')
+def update_book(current_user, book_id):
+    book = books.query.get(book_id)
+    if not book:
+        return jsonify({'error': 'Book not found'}), 404
+
+    data = request.get_json()
+    if 'title' in data:
+        book.title = data['title']
+    if 'author_id' in data:
+        book.author_id = data['author_id']
+    if 'published_year' in data:
+        book.published_year = data['published_year']
+
+    db.session.commit()
+    return jsonify({'message': 'Book updated successfully!'})
+
 @books_bp.route('', methods=['GET'])
 @token_required
 def get_books(current_user):
+    bookId = request.args.get('bookId', None)
     title_query = request.args.get('title', None)
     page = request.args.get('page', default=1, type=int)
-    limit = request.args.get('limit', default=10, type=int)
+    limit = request.args.get('limit', default=100000000, type=int)
     bookQuery = books.query
+    if bookId:
+        bookQuery = bookQuery.filter_by(book_id=bookId)
+        if bookQuery.first() is None:
+            return jsonify({'error': 'Book not found'}), 404
     if title_query:
         bookQuery = bookQuery.filter(books.title.ilike(f"%{title_query}%"))
     pagination = bookQuery.paginate(page=page, per_page=limit, error_out=False)
@@ -27,9 +63,9 @@ def get_books(current_user):
 @books_bp.route('', methods=['POST'])
 @token_required
 @role_required('ctv')
-def add_book():
+def add_book(current_user):
     data = request.get_json()
-    required_fields = ['title', 'author_id']
+    required_fields = ['title', 'author_id', 'published_year']
     for field in required_fields:
         if field not in data:
             return jsonify({'error': f'Missing field: {field}'}), 400

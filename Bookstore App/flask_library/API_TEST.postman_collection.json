@@ -1,0 +1,999 @@
+{
+	"info": {
+		"_postman_id": "b6753bc0-e030-4081-869b-be179d4cdf32",
+		"name": "API TEST",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49749718"
+	},
+	"item": [
+		{
+			"name": "Authentication successful",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"try {",
+							"    var jsonData = pm.response.json();",
+							"    var jwtToken = jsonData.token; ",
+							"    if (jwtToken) {",
+							"        pm.environment.set(\"authToken\", jwtToken);",
+							"        console.log(\"JWT Token successfully stored as authToken: \" + jwtToken);",
+							"        pm.test(\"JWT Token is stored in environment variable 'authToken'\", function() {",
+							"            pm.expect(pm.environment.get(\"authToken\")).to.equal(jwtToken);",
+							"        });",
+							"",
+							"    } else {",
+							"        pm.expect(jwtToken, \"Token field ('token') is missing in the response body.\").to.not.be.undefined;",
+							"    }",
+							"",
+							"} catch (e) {",
+							"    pm.test(\"Response body must be valid JSON\", function() {",
+							"        pm.expect(e).to.be.null;",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"johndoe@example.com\",\n    \"password\":\"123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/members/authentication",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"members",
+						"authentication"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Authentication fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 401 (Unauthorized)\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							"try {",
+							"    var jsonData = pm.response.json();",
+							"    pm.test(\"Response body is valid JSON\", function() {",
+							"        pm.expect(true).to.be.true;",
+							"    });",
+							"",
+							"    pm.test(\"Response body contains an error message (error or message)\", function() {",
+							"        pm.expect(jsonData.error || jsonData.message).to.exist;",
+							"    });",
+							"",
+							"    pm.test(\"JWT Token is NOT present in the response\", function() {",
+							"        pm.expect(jsonData.token).to.be.undefined;",
+							"    });",
+							"",
+							"} catch (e) {",
+							"    pm.test(\"Response body must be valid JSON\", function() {",
+							"        throw new Error(\"Response body was not valid JSON. Parse error: \" + e.message);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"johndoe@example.com\",\n    \"password\":\"1234\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/members/authentication",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"members",
+						"authentication"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add book successful",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"try {",
+							"    const jsonData = pm.response.json();",
+							"",
+							"    pm.test(\"Response body is a valid JSON object\", function() {",
+							"        pm.expect(jsonData).to.be.an('object');",
+							"    });",
+							"",
+							"    pm.test(\"Response contains a 'book_id' and it is a number\", function() {",
+							"        pm.expect(jsonData.book_id).to.exist;",
+							"        pm.expect(jsonData.book_id).to.be.a('number');",
+							"    });",
+							"",
+							"    pm.test(\"Response contains the correct success message\", function() {",
+							"        pm.expect(jsonData.message).to.exist;",
+							"        pm.expect(jsonData.message).to.equal(\"Book added successfully!\");",
+							"    });",
+							"    ",
+							"    if (jsonData.book_id) {",
+							"        pm.environment.set(\"new_book_id\", jsonData.book_id);",
+							"    }",
+							"",
+							"} catch (e) {",
+							"    pm.test(\"Response body must be valid JSON\", function() {",
+							"        throw new Error(\"Failed to parse response body as JSON. Error: \" + e.message);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Duck Nhan Tam\",\n    \"author_id\": 1,\n    \"published_year\": 2024\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add book fail ( no year)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 (Bad Request)\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"try {",
+							"    const jsonData = pm.response.json();",
+							"",
+							"    pm.test(\"Response body is valid JSON\", function() {",
+							"        pm.expect(jsonData).to.be.an('object');",
+							"    });",
+							"",
+							"    pm.test(\"Response contains an error message (e.g., 'title is required')\", function() {",
+							"        pm.expect(jsonData.error || jsonData.message).to.exist;",
+							"        console.log(\"Error message from server: \" + (jsonData.error || jsonData.message));",
+							"    });",
+							"",
+							"    pm.test(\"Response does NOT contain a 'book_id'\", function() {",
+							"        pm.expect(jsonData.book_id).to.be.undefined;",
+							"    });",
+							"",
+							"} catch (e) {",
+							"    pm.test(\"Response body must be valid JSON\", function() {",
+							"        throw new Error(\"Failed to parse response body as JSON. Error: \" + e.message);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Duck Nhan Tam\",\n    \"author_id\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add book fail ( no author)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 (Bad Request)\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"try {",
+							"    const jsonData = pm.response.json();",
+							"",
+							"    pm.test(\"Response body is valid JSON\", function() {",
+							"        pm.expect(jsonData).to.be.an('object');",
+							"    });",
+							"",
+							"    pm.test(\"Response contains an error message (e.g., 'title is required')\", function() {",
+							"        pm.expect(jsonData.error || jsonData.message).to.exist;",
+							"        console.log(\"Error message from server: \" + (jsonData.error || jsonData.message));",
+							"    });",
+							"",
+							"    pm.test(\"Response does NOT contain a 'book_id'\", function() {",
+							"        pm.expect(jsonData.book_id).to.be.undefined;",
+							"    });",
+							"",
+							"} catch (e) {",
+							"    pm.test(\"Response body must be valid JSON\", function() {",
+							"        throw new Error(\"Failed to parse response body as JSON. Error: \" + e.message);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Duck Nhan Tam\",\n    \"published_year\": 2024\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add book fail ( no name)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 (Bad Request)\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"try {",
+							"    const jsonData = pm.response.json();",
+							"",
+							"    pm.test(\"Response body is valid JSON\", function() {",
+							"        pm.expect(jsonData).to.be.an('object');",
+							"    });",
+							"",
+							"    pm.test(\"Response contains an error message (e.g., 'title is required')\", function() {",
+							"        pm.expect(jsonData.error || jsonData.message).to.exist;",
+							"        console.log(\"Error message from server: \" + (jsonData.error || jsonData.message));",
+							"    });",
+							"",
+							"    pm.test(\"Response does NOT contain a 'book_id'\", function() {",
+							"        pm.expect(jsonData.book_id).to.be.undefined;",
+							"    });",
+							"",
+							"} catch (e) {",
+							"    pm.test(\"Response body must be valid JSON\", function() {",
+							"        throw new Error(\"Failed to parse response body as JSON. Error: \" + e.message);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"author_id\": 1,\n    \"published_year\": 2024\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get books successful",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// check status code ",
+							"pm.test(\"Status code is 200 (OK)\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"//check response time. < 800ms is good",
+							"pm.test(\"Response time is acceptable (e.g., below 800ms)\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(800);",
+							"});",
+							"",
+							"//check content-type header.",
+							"pm.test(\"Content-Type header is 'application/json'\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"try {",
+							"    const jsonData = pm.response.json();",
+							"",
+							"    // test if body is a valid array",
+							"    pm.test(\"Response body is a valid JSON Array\", function() {",
+							"        pm.expect(jsonData).to.be.an('array');",
+							"    });",
+							"",
+							"    // test if the list is empty",
+							"    pm.test(\"Book list is not empty\", function() {",
+							"        pm.expect(jsonData.length).to.be.greaterThan(0);",
+							"    });",
+							"",
+							"    // test the first book. if it is correct then the rest should be correct",
+							"    pm.test(\"First book object has correct schema and data types\", function() {",
+							"        const firstBook = jsonData[0];",
+							"",
+							"        // test if it is an object",
+							"        pm.expect(firstBook).to.be.an('object');",
+							"        ",
+							"        // test if it has all keys",
+							"        pm.expect(firstBook).to.have.all.keys('author_id', 'book_id', 'published_year', 'title');",
+							"        ",
+							"        //test each data type",
+							"        pm.expect(firstBook.author_id).to.be.a('number', \"author_id should be a number\");",
+							"        pm.expect(firstBook.book_id).to.be.a('number', \"book_id should be a number\");",
+							"        pm.expect(firstBook.published_year).to.be.a('number', \"published_year should be a number\");",
+							"        pm.expect(firstBook.title).to.be.a('string', \"title should be a string\");",
+							"    });",
+							"",
+							"} catch (e) {",
+							"    pm.test(\"Response body must be valid JSON\", function() {",
+							"        throw new Error(\"Failed to parse response body as JSON. Error: \" + e.message);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get books page 2 successful",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var data = pm.response.json();",
+							"const expectedLimit = 10;",
+							"",
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is valid JSON (is an array)\", function () {",
+							"    pm.response.to.be.json;",
+							"    pm.expect(data).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(`TC-1: Returns AT MOST ${expectedLimit} books (Respects limit)`, function () {",
+							"   pm.expect(data.length).to.be.at.most(expectedLimit);",
+							"});",
+							"",
+							"pm.test(\"TC-2: Book objects have required fields (book_id, title)\", function() {",
+							"    if (data.length > 0) {",
+							"        const firstBook = data[0];",
+							"        pm.expect(firstBook.book_id).to.be.a('number');",
+							"        pm.expect(firstBook.title).to.be.a('string');",
+							"        pm.expect(firstBook.author_id).to.be.a('number');",
+							"        pm.expect(firstBook.published_year).to.be.a('number');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books?page=2&limit=10",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "2"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get books by id successful",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var data = pm.response.json();",
+							"const requestedBookId = pm.variables.get(\"new_book_id\");",
+							"",
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is a valid JSON array\", function () {",
+							"    pm.response.to.be.json;",
+							"    pm.expect(data).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Response contains exactly one book\", function() {",
+							"    pm.expect(data.length).to.equal(1);",
+							"});",
+							"",
+							"if (data.length > 0) {",
+							"    const book = data[0];",
+							"",
+							"    pm.test(\"Returned book_id matches the requested ID\", function() {",
+							"        pm.expect(book.book_id).to.equal(parseInt(requestedBookId, 10));",
+							"    });",
+							"",
+							"    pm.test(\"Book object has all required fields\", function() {",
+							"        pm.expect(book).to.have.property('book_id');",
+							"        pm.expect(book).to.have.property('title');",
+							"        pm.expect(book).to.have.property('author_id');",
+							"        pm.expect(book).to.have.property('published_year');",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books?bookId={{new_book_id}}",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					],
+					"query": [
+						{
+							"key": "bookId",
+							"value": "{{new_book_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get books by id fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 (Not Found)\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Response is valid JSON\", function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response contains correct 'error' message\", function () {",
+							"    const data = pm.response.json();",
+							"    pm.expect(data.error).to.equal(\"Book not found\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books?bookId=-1",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					],
+					"query": [
+						{
+							"key": "bookId",
+							"value": "-1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get books fail ( no credential)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 401 (Unauthorized)\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							"try {",
+							"    const jsonData = pm.response.json();",
+							"    ",
+							"    pm.test(\"Response body contains an error message (error or message)\", function() {",
+							"        pm.expect(jsonData.error || jsonData.message).to.exist;",
+							"    });",
+							"",
+							"    pm.test(\"Response body is NOT an array (should be an error object)\", function() {",
+							"        pm.expect(jsonData).to.not.be.an('array', \"Data was leaked!\");",
+							"    });",
+							"",
+							"} catch (e) {",
+							"    pm.test(\"Response body must be valid JSON\", function() {",
+							"        throw new Error(\"Failed to parse response body as JSON. Error: \" + e.message);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update book successful",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is valid JSON\", function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response contains correct success message\", function () {",
+							"    pm.expect(data.message).to.equal(\"Book updated successfully!\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"I HAVE BEEN UPDATED!!!!\",\n    \"author_id\": 1,\n    \"published_year\": 2024\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books/{{new_book_id}}",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books",
+						"{{new_book_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get updated book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var data = pm.response.json();",
+							"const book = data[0];",
+							"const updatedId = pm.variables.get(\"new_book_id\");",
+							"",
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is a valid JSON array\", function () {",
+							"    pm.response.to.be.json;",
+							"    pm.expect(data).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Response array contains exactly one book\", function() {",
+							"    pm.expect(data.length).to.equal(1);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Book title matches the updated title\", function() {",
+							"    pm.expect(book.title).to.equal(\"I HAVE BEEN UPDATED!!!!\");",
+							"});",
+							"",
+							"pm.test(\"Book author_id matches the updated author_id\", function() {",
+							"    pm.expect(book.author_id).to.equal(1);",
+							"});",
+							"",
+							"pm.test(\"Book published_year matches the updated year\", function() {",
+							"    pm.expect(book.published_year).to.equal(2024);",
+							"});",
+							"",
+							"pm.test(\"Book ID matches the requested ID\", function() {",
+							"    pm.expect(book.book_id).to.equal(parseInt(updatedId, 10));",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books?bookId={{new_book_id}}",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					],
+					"query": [
+						{
+							"key": "bookId",
+							"value": "{{new_book_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is valid JSON\", function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response contains correct success message\", function () {",
+							"    pm.expect(data.message).to.equal(\"Book deleted successfully!\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books/{{new_book_id}}",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books",
+						"{{new_book_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get deleted book by id (should fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 (Not Found)\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Response is valid JSON\", function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response contains correct 'error' message\", function () {",
+							"    const data = pm.response.json();",
+							"    pm.expect(data.error).to.equal(\"Book not found\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://172.18.0.3:5000/api/books?bookId={{new_book_id}}",
+					"protocol": "http",
+					"host": [
+						"172",
+						"18",
+						"0",
+						"3"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"books"
+					],
+					"query": [
+						{
+							"key": "bookId",
+							"value": "{{new_book_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	}
+}
