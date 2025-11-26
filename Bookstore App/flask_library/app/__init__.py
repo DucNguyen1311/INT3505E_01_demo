@@ -6,13 +6,17 @@ import uuid
 from app.models import members
 from functools import wraps
 from datetime import datetime, timezone, timedelta
-from app.extension import db
+from app.extension import db, limiter, metrics
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object('app.config.Config')
 
     db.init_app(app)
+    limiter.init_app(app)
+    metrics.init_app(app)
+    metrics.info('app_info', 'Library API Info', version='1.0.0')
+
 
     from app.Route.BookRoute import books_bp
     from app.Route.AuthorRoute import authors_bp;
